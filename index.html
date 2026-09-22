@@ -66,6 +66,15 @@ h1{margin:0;font-size:clamp(2rem,4vw,3.35rem);line-height:1;font-family:"Segoe P
   position:sticky;top:0;z-index:30;background:#fafaf6;border-bottom:2px solid #bcc5cf;
   font-family:"Segoe Print","Comic Sans MS",cursive;font-weight:800
 }
+.sort-header{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+}
+.sort-btn{
+  flex:0 0 auto;width:28px;height:28px;padding:0;border:1px solid #cbd2da;border-radius:7px;
+  background:rgba(255,255,255,.78);color:#536070;font-size:14px;line-height:1;cursor:pointer;
+}
+.sort-btn:hover{background:#fff;color:#172033;border-color:#aeb7c2}
+.sort-btn.active{background:#fff;color:#1769ff;border-color:#9fc0ff;box-shadow:0 0 0 2px rgba(23,105,255,.08)}
 .heading>div,.row>div{min-width:0;padding:12px 13px;border-right:1px solid #d9dee4}
 .heading>div:last-child,.row>div:last-child{border-right:0}
 .row{border-bottom:1px solid #dfe3e8;background:rgba(255,255,255,.97);align-items:stretch}
@@ -187,6 +196,7 @@ const sync = $("sync"), syncText=$("syncText"), header=$("header"), rows=$("rows
       editor=$("editor"), fields=$("fields"), editKey=$("editKey"), dialogTitle=$("dialogTitle");
 
 let db=null, orders=[];
+let dateSort=null; // null = orden del Excel, "asc" = antigua→reciente, "desc" = reciente→antigua
 
 function esc(v=""){
   return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
@@ -209,11 +219,61 @@ function compatible(o={}){
   }
   return x;
 }
+
+function parseSortableDate(value){
+  const text=String(value??"").trim();
+  if(!text)return null;
+
+  // dd/mm/aaaa, dd-mm-aaaa o dd.mm.aaaa
+  let m=text.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  if(m){
+    const d=Number(m[1]),mo=Number(m[2])-1,y=Number(m[3]);
+    const date=new Date(y,mo,d);
+    if(date.getFullYear()===y&&date.getMonth()===mo&&date.getDate()===d)return date.getTime();
+  }
+
+  // aaaa-mm-dd
+  m=text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){
+    const y=Number(m[1]),mo=Number(m[2])-1,d=Number(m[3]);
+    const date=new Date(y,mo,d);
+    if(date.getFullYear()===y&&date.getMonth()===mo&&date.getDate()===d)return date.getTime();
+  }
+
+  // Último intento para otros formatos reconocibles por el navegador.
+  const parsed=Date.parse(text);
+  return Number.isNaN(parsed)?null:parsed;
+}
+
 function renderHeader(){
   header.innerHTML=COLS.map((c,i)=>{
-    const cls=[c.cls,i===0?"h-order":"",i===1?"h-client":""].filter(Boolean).join(" ");
+    const cls=[c.cls,i===0?"h-order":"",i===1?"h-client":"",c.key==="fechaSalida"?"sort-header":""].filter(Boolean).join(" ");
+
+    if(c.key==="fechaSalida"){
+      const arrow=dateSort==="asc"?"▲":dateSort==="desc"?"▼":"↕";
+      const title=dateSort==="asc"
+        ?"Ordenado: fecha más antigua primero"
+        :dateSort==="desc"
+          ?"Ordenado: fecha más reciente primero"
+          :"Ordenar por fecha";
+
+      return `<div class="${cls}">
+        <span>${esc(c.label)}</span>
+        <button id="dateSortBtn" class="sort-btn ${dateSort?"active":""}" type="button" title="${title}" aria-label="${title}">${arrow}</button>
+      </div>`;
+    }
+
     return `<div class="${cls}">${esc(c.label)}</div>`;
   }).join("")+"<div>ACCIONES</div>";
+
+  const sortBtn=document.getElementById("dateSortBtn");
+  if(sortBtn){
+    sortBtn.addEventListener("click",()=>{
+      dateSort=dateSort==="asc"?"desc":"asc";
+      renderHeader();
+      render();
+    });
+  }
 }
 function render(){
   const q=search.value.trim().toLowerCase();
@@ -223,6 +283,20 @@ function render(){
   });
 
   list.sort((a,b)=>{
+    if(dateSort){
+      const aDate=parseSortableDate(compatible(a).fechaSalida);
+      const bDate=parseSortableDate(compatible(b).fechaSalida);
+
+      // Fechas vacías/no reconocibles siempre al final.
+      if(aDate===null&&bDate!==null)return 1;
+      if(aDate!==null&&bDate===null)return -1;
+
+      if(aDate!==null&&bDate!==null&&aDate!==bDate){
+        return dateSort==="asc"?aDate-bDate:bDate-aDate;
+      }
+    }
+
+    // Si no se ordena por fecha (o empatan), mantenemos el orden natural del Excel.
     const ao=Number(a.ordenExcel??999999),bo=Number(b.ordenExcel??999999);
     if(ao!==bo)return ao-bo;
     return Number(b.createdAt||b.updatedAt||0)-Number(a.createdAt||a.updatedAt||0);
