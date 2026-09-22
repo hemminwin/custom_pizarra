@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "orders": {
+      ".read": true,
+      ".write": true,
+      "$orderId": {
+        ".validate": "newData.hasChildren(['number','client','items','date','updatedAt']) && newData.child('number').isString() && newData.child('number').val().length <= 60 && newData.child('client').isString() && newData.child('client').val().length <= 140 && newData.child('items').isString() && newData.child('items').val().length <= 4000 && newData.child('date').isString() && newData.child('date').val().length <= 10"
+      }
+    }
+  }
+}
