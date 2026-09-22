@@ -56,11 +56,17 @@ h1{margin:0;font-size:clamp(2rem,4vw,3.35rem);line-height:1;font-family:"Segoe P
   overflow:hidden;border:9px solid #aeb4bc;border-radius:17px;background:#fff;
   box-shadow:0 15px 42px rgba(23,32,51,.10),inset 0 0 0 2px #e4e7ea
 }
-.scroll{overflow:auto;max-height:calc(100vh - 215px);min-height:280px}
+.scroll{overflow-y:auto;overflow-x:hidden;max-height:calc(100vh - 215px);min-height:280px}
 .grid{
   display:grid;
-  grid-template-columns:145px 260px 180px 170px 155px 170px 160px 190px 160px 190px 165px 115px;
-  width:max-content;min-width:100%
+  grid-template-columns:
+    minmax(90px,.72fr)
+    minmax(140px,1.25fr)
+    repeat(8,minmax(105px,.82fr))
+    minmax(110px,.85fr)
+    minmax(86px,.62fr);
+  width:100%;
+  min-width:0
 }
 .heading{
   position:sticky;top:0;z-index:30;background:#fafaf6;border-bottom:2px solid #bcc5cf;
@@ -80,7 +86,7 @@ h1{margin:0;font-size:clamp(2rem,4vw,3.35rem);line-height:1;font-family:"Segoe P
 .row{border-bottom:1px solid #dfe3e8;background:rgba(255,255,255,.97);align-items:stretch}
 .row>div{display:flex;align-items:center;min-height:76px;white-space:pre-wrap;overflow-wrap:anywhere}
 .h-order,.c-order{position:sticky;left:0;z-index:15;background:#fbfbf7}
-.h-client,.c-client{position:sticky;left:145px;z-index:14;background:#fbfbf7}
+.h-client,.c-client{position:relative;z-index:14;background:#fbfbf7}
 .h-order,.h-client{z-index:40}
 .c-order{font-family:"Segoe Print","Comic Sans MS",cursive;font-weight:800}
 .c-client{font-weight:650}
@@ -102,12 +108,179 @@ dialog form{padding:22px;max-height:calc(100vh - 28px);overflow:auto}
 .field textarea{min-height:78px;resize:vertical}
 .field input:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(23,105,255,.09)}
 .dialog-actions{justify-content:flex-end;margin-top:18px}
-@media(max-width:900px){
+/* ===== RESPONSIVE ===== */
+
+/* Portátiles y tablets horizontales: compactamos sin scroll horizontal */
+@media(max-width:1250px){
+  .shell{width:calc(100% - 18px);margin:12px auto 28px}
+  .grid{
+    grid-template-columns:
+      minmax(72px,.62fr)
+      minmax(105px,1fr)
+      repeat(8,minmax(76px,.72fr))
+      minmax(90px,.78fr)
+      minmax(70px,.58fr)
+  }
+  .heading>div,.row>div{
+    padding:9px 8px;
+    font-size:.82rem;
+  }
+  .row>div{min-height:64px}
+  .row-btn{padding:6px 6px;font-size:.78rem}
+  .sort-btn{width:24px;height:24px}
+  .c-order{font-size:.9rem!important}
+}
+
+/* Tablets: seguimos mostrando tabla, pero aún más compacta */
+@media(max-width:980px){
   .top,.toolbar{align-items:stretch;flex-direction:column}
   .top-actions,.toolbar-actions{flex-wrap:wrap}
   .search{max-width:none}
-  .fields{grid-template-columns:1fr}.field.wide{grid-column:auto}
-  .scroll{max-height:calc(100vh - 280px)}
+  .grid{
+    grid-template-columns:
+      minmax(68px,.65fr)
+      minmax(95px,1fr)
+      repeat(8,minmax(68px,.76fr))
+      minmax(82px,.8fr)
+      minmax(64px,.62fr)
+  }
+  .heading>div,.row>div{
+    padding:8px 6px;
+    font-size:.74rem;
+  }
+  .heading{font-family:"Segoe UI",Inter,system-ui,sans-serif}
+  .row>div{line-height:1.25}
+  .actions{flex-direction:column;gap:4px}
+  .row-btn{width:100%;padding:5px 4px}
+  .fields{grid-template-columns:1fr}
+  .field.wide{grid-column:auto}
+  .scroll{max-height:none}
+}
+
+/* Móvil: cada pedido pasa a tarjeta; desaparece el scroll horizontal */
+@media(max-width:760px){
+  body{background:#f1f3f6}
+  .shell{width:calc(100% - 12px);margin:8px auto 24px}
+  h1{font-size:2rem}
+  .subtitle{font-size:.9rem}
+
+  .top-actions,.toolbar-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    width:100%;
+  }
+  .sync{grid-column:1/-1;justify-content:center}
+  .btn,.upload{width:100%}
+
+  .board{
+    border-width:5px;
+    border-radius:13px;
+    background:transparent;
+  }
+
+  .scroll{
+    overflow:visible;
+    max-height:none;
+  }
+
+  .heading{
+    display:none;
+  }
+
+  #rows{
+    display:grid;
+    gap:10px;
+    padding:8px;
+    background:#eef1f4;
+  }
+
+  .grid.row{
+    display:grid;
+    grid-template-columns:1fr;
+    width:100%;
+    min-width:0;
+    border:1px solid #cfd5dd;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(23,32,51,.06);
+  }
+
+  .row>div{
+    position:static!important;
+    display:grid;
+    grid-template-columns:minmax(105px,34%) 1fr;
+    gap:10px;
+    min-height:0;
+    padding:8px 10px;
+    font-size:.88rem!important;
+    border-right:0;
+    border-bottom:1px solid rgba(90,100,115,.13);
+    background:inherit;
+    align-items:start;
+  }
+
+  .row>div::before{
+    content:attr(data-label);
+    display:block;
+    font-weight:800;
+    color:#495465;
+    font-size:.76rem;
+    line-height:1.25;
+  }
+
+  .row>div:empty::after{
+    content:"—";
+    color:#9aa1aa;
+  }
+
+  .c-order,.c-client{
+    position:static!important;
+  }
+
+  .c-order{
+    background:#fbfbf7!important;
+    font-family:"Segoe Print","Comic Sans MS",cursive;
+  }
+
+  .c-client{
+    background:#fbfbf7!important;
+  }
+
+  .actions{
+    display:flex!important;
+    flex-direction:row!important;
+    justify-content:flex-end;
+    gap:8px;
+    background:#fafaf7!important;
+    border-bottom:0!important;
+  }
+
+  .actions::before{
+    margin-right:auto;
+  }
+
+  .row-btn{
+    width:auto;
+    padding:7px 10px;
+    font-size:.82rem;
+  }
+
+  .message{font-size:.9rem}
+}
+
+/* Móviles pequeños */
+@media(max-width:460px){
+  .top-actions,.toolbar-actions{
+    grid-template-columns:1fr;
+  }
+  .sync{grid-column:auto}
+  .row>div{
+    grid-template-columns:95px 1fr;
+    gap:8px;
+    padding:7px 8px;
+    font-size:.84rem!important;
+  }
+  .row>div::before{font-size:.72rem}
 }
 </style>
 </head>
@@ -310,9 +483,9 @@ function render(){
     const o=compatible(raw);
     const cells=COLS.map((c,i)=>{
       const cls=[c.cls,c.type==="plain"?"plain":"",i===0?"c-order":"",i===1?"c-client":""].filter(Boolean).join(" ");
-      return `<div class="${cls}">${esc(o[c.key]??"")}</div>`;
+      return `<div class="${cls}" data-label="${esc(c.label)}">${esc(o[c.key]??"")}</div>`;
     }).join("");
-    return `<article class="grid row" data-key="${esc(raw.key)}">${cells}<div class="actions">
+    return `<article class="grid row" data-key="${esc(raw.key)}">${cells}<div class="actions" data-label="ACCIONES">
       <button class="row-btn" type="button" data-act="edit">Editar</button>
       <button class="row-btn del" type="button" data-act="del">×</button>
     </div></article>`;
