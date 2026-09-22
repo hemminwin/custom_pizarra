@@ -1,74 +1,93 @@
-# Pizarra de Pedidos — versión ultrasimple
+# Pizarra de Pedidos — versión simple
 
-No necesitas instalar absolutamente nada.
+Esta versión NO necesita Node.js, npm, Wrangler ni Cloudflare.
 
-La web real son solo tres archivos:
+Solo usa:
 
-- `index.html` — contiene toda la interfaz, estilos y funcionamiento.
-- `firebase-config.js` — aquí pegas la configuración que te da Firebase.
-- `database.rules.json` — copias su contenido una vez en las reglas de Realtime Database.
+- GitHub Pages para publicar la web.
+- Firebase Realtime Database para guardar y sincronizar los pedidos.
 
-`README.md` es solamente este manual.
+## Archivos
 
-## PASO 1 — Crear Firebase
+- `index.html`
+- `styles.css`
+- `firebase-config.js`
+- `app.js`
+- `database.rules.json`
 
-1. Entra en https://console.firebase.google.com/
-2. Crea un proyecto. Puedes desactivar Google Analytics.
-3. Dentro del proyecto abre **Realtime Database**.
-4. Pulsa **Crear base de datos** y crea la base.
+La configuración de tu proyecto Firebase ya está puesta en `firebase-config.js`.
 
-## PASO 2 — Reglas de la base
+## 1. Configurar las reglas de Firebase
 
-1. En **Realtime Database > Reglas**, borra las reglas que haya.
-2. Abre `database.rules.json` con el Bloc de notas.
-3. Copia todo su contenido.
-4. Pégalo en Firebase.
+En Firebase:
+
+1. Entra en **Realtime Database**.
+2. Abre la pestaña **Reglas**.
+3. Borra lo que haya.
+4. Copia TODO el contenido de `database.rules.json`.
 5. Pulsa **Publicar**.
 
-Estas reglas permiten trabajar sin iniciar sesión. Es la versión más sencilla, pero no es adecuada para información confidencial: quien consiga los datos técnicos de tu proyecto Firebase podría intentar leer o modificar la base.
+IMPORTANTE: estas reglas permiten leer y escribir en `pedidos` sin inicio de sesión.
+Eso hace posible usar la pizarra sin cuentas, pero no es privacidad fuerte.
 
-## PASO 3 — Conseguir la configuración
+## 2. Subir la web a GitHub
 
-1. Vuelve a **Descripción general del proyecto**.
-2. Pulsa el icono Web `</>`.
-3. Pon de nombre `Pizarra de Pedidos`.
-4. NO necesitas Firebase Hosting.
-5. Firebase mostrará un bloque `firebaseConfig`.
-6. Abre `firebase-config.js` con el Bloc de notas y sustituye los `PEGA_AQUI` por esos datos.
+Crea un repositorio nuevo en GitHub, por ejemplo:
 
-Necesitas especialmente `databaseURL`. Si no aparece en el bloque, copia la URL que ves en Realtime Database; normalmente termina en `firebasedatabase.app`.
+`pizarra-pedidos`
 
-## PASO 4 — GitHub
+Sube estos cuatro archivos a la RAÍZ del repositorio:
 
-1. Crea un repositorio llamado, por ejemplo, `pizarra-pedidos`.
-2. Sube `index.html` y `firebase-config.js`. Puedes subir también README y `database.rules.json`; no afectan a la web.
-3. En el repositorio ve a **Settings > Pages**.
-4. En **Build and deployment**, selecciona **Deploy from a branch**.
-5. Selecciona `main` y `/ (root)`.
-6. Pulsa Guardar.
+- `index.html`
+- `styles.css`
+- `firebase-config.js`
+- `app.js`
 
-GitHub te dará una dirección parecida a:
+`database.rules.json` puede quedarse también en el repositorio, aunque Firebase no lo lee automáticamente.
 
-`https://TUUSUARIO.github.io/pizarra-pedidos/`
+## 3. Activar GitHub Pages
 
-## PASO 5 — Los tres ordenadores
+En GitHub:
 
-Abre esa misma dirección en los tres PCs. No hay usuarios ni contraseñas. Cuando uno añade, modifica o elimina un pedido, Firebase transmite el cambio a los demás en tiempo real.
+1. Entra en tu repositorio.
+2. **Settings**
+3. **Pages**
+4. En **Build and deployment**, elige **Deploy from a branch**.
+5. Rama: `main`
+6. Carpeta: `/ (root)`
+7. Pulsa **Save**.
 
-## Qué incluye
+GitHub te mostrará una dirección parecida a:
 
-- Nº de pedido.
-- Cliente.
-- Artículos (admite varias líneas pegadas).
-- Fecha.
-- Añadir, editar y eliminar.
-- Búsqueda.
-- Sincronización en tiempo real.
-- Exportar copia JSON.
-- Importar copia JSON.
-- Diseño de pizarra blanca.
-- Una única lista de pedidos, uno debajo de otro.
+`https://TU-USUARIO.github.io/pizarra-pedidos/`
 
-## Coste
+Usa esa misma dirección en los tres ordenadores.
 
-Para un uso pequeño, el plan Spark de Firebase Realtime Database dispone de cuota gratuita. Revisa sus límites vigentes si el uso crece.
+## 4. Probar
+
+Abre la web.
+
+El indicador debe pasar de:
+
+`Conectando...`
+
+a:
+
+`Sincronizado`
+
+Crea un pedido y abre la misma URL en otro ordenador o en otra ventana.
+El pedido debe aparecer automáticamente.
+
+## Si se queda en "Conectando..."
+
+Pulsa `F12` y abre **Consola**.
+
+- Si aparece `PERMISSION_DENIED`, las reglas de Firebase no están publicadas correctamente.
+- Si aparece `firebase is not defined`, algún script de Firebase no se ha cargado.
+- Si aparece un error 404 con `firebase-config.js`, `app.js` o `styles.css`, esos archivos no están en la raíz del repositorio.
+
+## Seguridad
+
+La configuración `firebaseConfig` que aparece en `firebase-config.js` es pública por diseño en las aplicaciones web de Firebase.
+
+La versión actual no usa autenticación porque el objetivo es no tener inicios de sesión. Por ello, cualquier persona que conozca la base de datos y pueda acceder a ella podría intentar leer o modificar los pedidos. No guardes datos especialmente sensibles en esta versión.

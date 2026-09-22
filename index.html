@@ -3,460 +3,97 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f8f5">
   <title>Pizarra de Pedidos</title>
-  <style>
-:root {
-  --ink: #202427;
-  --muted: #6c7377;
-  --board: #fbfcfa;
-  --paper: #f2f4ef;
-  --line: #d9ded8;
-  --blue: #2368d8;
-  --red: #c83d3d;
-  --green: #2f8b58;
-  --shadow: 0 18px 48px rgba(35, 43, 39, .10);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--ink);
-  background: #eef1ec;
-}
-
-* { box-sizing: border-box; }
-html { min-height: 100%; }
-body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #ffffff 0, #eef1ec 50%, #e8ebe6 100%); }
-button, input, textarea { font: inherit; }
-button { cursor: pointer; }
-
-.app-shell { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 46px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
-.eyebrow { margin: 0 0 4px; font-size: .72rem; letter-spacing: .17em; font-weight: 800; color: var(--blue); }
-h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.45rem); line-height: 1; letter-spacing: -.045em; }
-.subtitle { margin: 9px 0 0; color: var(--muted); }
-.top-actions, .toolbar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-.btn { border: 0; border-radius: 13px; padding: 11px 15px; font-weight: 750; transition: transform .12s ease, box-shadow .12s ease, background .12s ease; }
-.btn:hover { transform: translateY(-1px); }
-.btn.primary { color: white; background: var(--blue); box-shadow: 0 8px 20px rgba(35, 104, 216, .22); }
-.btn.ghost { background: rgba(255,255,255,.84); border: 1px solid var(--line); color: var(--ink); }
-.file-btn { position: relative; overflow: hidden; cursor: pointer; }
-.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-
-.sync-status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); background: rgba(255,255,255,.72); border: 1px solid var(--line); border-radius: 999px; padding: 9px 12px; font-size: .9rem; white-space: nowrap; }
-.sync-status .dot { width: 9px; height: 9px; border-radius: 50%; background: #9aa09d; }
-.sync-status.online .dot { background: var(--green); box-shadow: 0 0 0 4px rgba(47,139,88,.11); }
-.sync-status.error .dot { background: var(--red); }
-
-.board-wrap { display: grid; gap: 12px; }
-.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.search-box { display: flex; align-items: center; gap: 8px; width: min(570px, 100%); padding: 0 13px; border: 1px solid var(--line); background: rgba(255,255,255,.88); border-radius: 13px; }
-.search-box input { width: 100%; border: 0; outline: 0; background: transparent; padding: 12px 0; color: var(--ink); }
-
-.whiteboard { position: relative; overflow: hidden; border: 1px solid #d4dad3; border-radius: 24px; background: linear-gradient(115deg, rgba(255,255,255,.98), rgba(247,249,246,.97)); box-shadow: var(--shadow); padding: 28px; min-height: 530px; }
-.whiteboard::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .24; background-image: linear-gradient(rgba(40,50,44,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(40,50,44,.025) 1px, transparent 1px); background-size: 28px 28px; }
-.whiteboard > * { position: relative; }
-.board-title-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-bottom: 18px; border-bottom: 3px solid var(--ink); }
-.board-title-row h2 { margin: 0; font: 800 2rem/1.1 "Comic Sans MS", "Segoe Print", cursive; transform: rotate(-.5deg); }
-.board-title-row p { margin: 4px 0 0; color: var(--muted); }
-.marker-note { font: 700 1rem/1.2 "Comic Sans MS", "Segoe Print", cursive; color: var(--blue) !important; transform: rotate(1deg); }
-
-.table-head, .order-row { display: grid; grid-template-columns: minmax(110px,.8fr) minmax(170px,1.2fr) minmax(260px,2fr) minmax(130px,.8fr) minmax(150px,.9fr); gap: 14px; align-items: center; }
-.table-head { padding: 17px 14px 11px; color: #4c5350; font: 800 .9rem/1.2 "Comic Sans MS", "Segoe Print", cursive; border-bottom: 1px dashed #aeb6b0; }
-.orders-list { display: grid; }
-.order-row { padding: 15px 14px; min-height: 84px; border-bottom: 1px dashed #c8cec9; transition: background .12s ease, transform .12s ease; }
-.order-row:hover { background: rgba(35,104,216,.035); }
-.cell { min-width: 0; }
-.order-number { font: 800 1.15rem/1.25 "Comic Sans MS", "Segoe Print", cursive; color: var(--blue); }
-.client { font-weight: 750; }
-.items { white-space: pre-wrap; line-height: 1.45; color: #343a37; overflow-wrap: anywhere; }
-.date { font: 700 1rem/1.2 "Comic Sans MS", "Segoe Print", cursive; }
-.row-actions { display: flex; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
-.mini-btn { border: 1px solid var(--line); background: rgba(255,255,255,.84); border-radius: 9px; padding: 8px 10px; font-size: .84rem; font-weight: 720; }
-.mini-btn:hover { border-color: #b4bcb6; }
-.mini-btn.danger { color: var(--red); }
-
-.empty-state { text-align: center; padding: 86px 16px; color: var(--muted); }
-.empty-state h3 { color: var(--ink); margin: 8px 0 4px; }
-.empty-state p { margin: 0; }
-.empty-doodle { color: var(--blue); font: 800 3rem/1 "Comic Sans MS", cursive; transform: rotate(8deg); }
-.hidden { display: none !important; }
-
-.order-dialog { border: 0; border-radius: 20px; padding: 0; width: min(560px, calc(100% - 26px)); box-shadow: 0 28px 90px rgba(0,0,0,.24); }
-.order-dialog::backdrop { background: rgba(28,33,30,.45); backdrop-filter: blur(2px); }
-.order-dialog form { display: grid; gap: 16px; padding: 24px; background: #fff; }
-.dialog-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
-.dialog-head h2 { margin: 0; font-size: 1.65rem; }
-.icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 1.5rem; line-height: 1; }
-.order-dialog label { display: grid; gap: 6px; font-weight: 720; }
-.order-dialog input, .order-dialog textarea { width: 100%; border: 1px solid #cfd5d0; border-radius: 11px; padding: 11px 12px; outline: 0; background: #fbfcfa; }
-.order-dialog input:focus, .order-dialog textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(35,104,216,.09); }
-.order-dialog textarea { resize: vertical; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 5px; }
-
-@media (max-width: 900px) {
-  .topbar, .toolbar { align-items: stretch; flex-direction: column; }
-  .top-actions { justify-content: space-between; }
-  .search-box { width: 100%; }
-  .table-head { display: none; }
-  .order-row { grid-template-columns: 1fr; gap: 7px; padding: 18px 4px; }
-  .order-row .cell::before { display: block; margin-bottom: 2px; font-size: .72rem; font-weight: 800; color: #7a817d; text-transform: uppercase; letter-spacing: .08em; }
-  .order-number::before { content: "Nº pedido"; }
-  .client::before { content: "Cliente"; }
-  .items::before { content: "Artículos"; }
-  .date::before { content: "Fecha"; }
-  .row-actions { justify-content: flex-start; margin-top: 6px; }
-  .marker-note { display: none; }
-}
-
-@media (max-width: 520px) {
-  .app-shell { width: min(100% - 18px, 1500px); padding-top: 14px; }
-  .whiteboard { border-radius: 17px; padding: 18px; }
-  .top-actions, .toolbar-actions { width: 100%; }
-  .top-actions .btn, .toolbar-actions .btn { flex: 1; text-align: center; }
-  .sync-status { width: 100%; justify-content: center; }
-}
-
-  </style>
+  <meta name="theme-color" content="#f7f7f2">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
+  <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">PIZARRA COMPARTIDA</p>
         <h1>Pizarra de Pedidos</h1>
-        <p class="subtitle">Una sola lista · sincronización automática entre equipos</p>
+        <p class="subtitle">Sincronizada entre tus ordenadores</p>
       </div>
+
       <div class="top-actions">
-        <span id="syncStatus" class="sync-status offline"><span class="dot"></span><span>Conectando…</span></span>
-        <button id="newOrderBtn" class="btn primary">+ Nuevo pedido</button>
+        <span id="syncStatus" class="sync-status sync-connecting">
+          <span class="dot"></span>
+          <span id="syncText">Conectando...</span>
+        </span>
+
+        <button id="newOrderBtn" class="primary-btn" type="button">+ Nuevo pedido</button>
       </div>
     </header>
 
-    <main class="board-wrap">
-      <section class="toolbar" aria-label="Herramientas">
-        <label class="search-box">
-          <span>⌕</span>
-          <input id="searchInput" type="search" placeholder="Buscar nº de pedido, cliente o artículo…" autocomplete="off">
+    <section class="toolbar">
+      <label class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" placeholder="Buscar por nº, cliente, artículos o fecha">
+      </label>
+
+      <div class="toolbar-buttons">
+        <button id="exportBtn" class="secondary-btn" type="button">Exportar copia</button>
+        <label class="secondary-btn file-btn">
+          Importar copia
+          <input id="importInput" type="file" accept=".json,application/json">
         </label>
-        <div class="toolbar-actions">
-          <button id="exportBtn" class="btn ghost">Exportar copia</button>
-          <label class="btn ghost file-btn">
-            Importar copia
-            <input id="importInput" type="file" accept="application/json,.json">
-          </label>
-        </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="whiteboard">
-        <div class="board-title-row">
-          <div>
-            <h2>Pedidos</h2>
-            <p id="orderCount">0 pedidos</p>
-          </div>
-          <p class="marker-note">Todo en una única pizarra ✦</p>
-        </div>
+    <section class="whiteboard">
+      <div class="board-heading">
+        <div>Nº pedido</div>
+        <div>Cliente</div>
+        <div>Artículos</div>
+        <div>Fecha</div>
+        <div class="actions-title">Acciones</div>
+      </div>
 
-        <div class="table-head" aria-hidden="true">
-          <div>Nº pedido</div>
-          <div>Cliente</div>
-          <div>Artículos</div>
-          <div>Fecha</div>
-          <div></div>
-        </div>
-
-        <div id="ordersList" class="orders-list" aria-live="polite"></div>
-
-        <div id="emptyState" class="empty-state hidden">
-          <div class="empty-doodle">↘</div>
-          <h3>La pizarra está limpia</h3>
-          <p>Añade el primer pedido con el botón de arriba.</p>
-        </div>
-      </section>
-    </main>
-  </div>
+      <div id="ordersList" class="orders-list">
+        <div class="empty-state">Conectando con la pizarra…</div>
+      </div>
+    </section>
+  </main>
 
   <dialog id="orderDialog" class="order-dialog">
     <form id="orderForm" method="dialog">
-      <div class="dialog-head">
-        <div>
-          <p class="eyebrow">PEDIDO</p>
-          <h2 id="dialogTitle">Nuevo pedido</h2>
-        </div>
+      <div class="dialog-header">
+        <h2 id="dialogTitle">Nuevo pedido</h2>
         <button id="closeDialogBtn" class="icon-btn" type="button" aria-label="Cerrar">×</button>
       </div>
 
-      <input id="orderId" type="hidden">
+      <input id="firebaseKey" type="hidden">
 
       <label>
-        <span>Nº pedido</span>
-        <input id="orderNumber" type="text" maxlength="60" required placeholder="Ej. 25458">
+        Nº pedido
+        <input id="orderNumber" name="orderNumber" type="text" required autocomplete="off">
       </label>
 
       <label>
-        <span>Cliente</span>
-        <input id="client" type="text" maxlength="140" required placeholder="Ej. Empresa Ejemplo S.L.">
+        Cliente
+        <input id="clientName" name="clientName" type="text" required autocomplete="off">
       </label>
 
       <label>
-        <span>Artículos</span>
-        <textarea id="items" maxlength="4000" required rows="5" placeholder="Puedes pegar varias líneas aquí"></textarea>
+        Artículos
+        <textarea id="articles" name="articles" rows="5" required placeholder="Puedes escribir varias líneas"></textarea>
       </label>
 
       <label>
-        <span>Fecha</span>
-        <input id="deliveryDate" type="date" required>
+        Fecha
+        <input id="orderDate" name="orderDate" type="date" required>
       </label>
 
       <div class="dialog-actions">
-        <button id="cancelBtn" type="button" class="btn ghost">Cancelar</button>
-        <button type="submit" class="btn primary">Guardar pedido</button>
+        <button id="cancelBtn" class="secondary-btn" type="button">Cancelar</button>
+        <button class="primary-btn" type="submit">Guardar</button>
       </div>
     </form>
   </dialog>
 
-  <template id="orderTemplate">
-    <article class="order-row">
-      <div class="cell order-number"></div>
-      <div class="cell client"></div>
-      <div class="cell items"></div>
-      <div class="cell date"></div>
-      <div class="cell row-actions">
-        <button class="mini-btn edit-btn" type="button">Editar</button>
-        <button class="mini-btn danger delete-btn" type="button">Eliminar</button>
-      </div>
-    </article>
-  </template>
-
-  <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  update,
-  remove,
-  onValue
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-import { firebaseConfig } from "./firebase-config.js";
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const ordersRef = ref(db, "orders");
-
-const els = {
-  syncStatus: document.querySelector("#syncStatus"),
-  newOrderBtn: document.querySelector("#newOrderBtn"),
-  searchInput: document.querySelector("#searchInput"),
-  exportBtn: document.querySelector("#exportBtn"),
-  importInput: document.querySelector("#importInput"),
-  ordersList: document.querySelector("#ordersList"),
-  emptyState: document.querySelector("#emptyState"),
-  orderCount: document.querySelector("#orderCount"),
-  orderTemplate: document.querySelector("#orderTemplate"),
-  dialog: document.querySelector("#orderDialog"),
-  form: document.querySelector("#orderForm"),
-  dialogTitle: document.querySelector("#dialogTitle"),
-  closeDialogBtn: document.querySelector("#closeDialogBtn"),
-  cancelBtn: document.querySelector("#cancelBtn"),
-  orderId: document.querySelector("#orderId"),
-  orderNumber: document.querySelector("#orderNumber"),
-  client: document.querySelector("#client"),
-  items: document.querySelector("#items"),
-  deliveryDate: document.querySelector("#deliveryDate")
-};
-
-let orders = [];
-let loadedOnce = false;
-
-function setStatus(type, text) {
-  els.syncStatus.className = `sync-status ${type}`;
-  els.syncStatus.querySelector("span:last-child").textContent = text;
-}
-
-function safeText(value) {
-  return String(value ?? "");
-}
-
-function formatDate(iso) {
-  if (!iso) return "—";
-  const [y, m, d] = iso.split("-");
-  return y && m && d ? `${d}/${m}/${y}` : iso;
-}
-
-function filteredOrders() {
-  const q = els.searchInput.value.trim().toLowerCase();
-  if (!q) return orders;
-  return orders.filter(order => [order.number, order.client, order.items, order.date]
-    .some(value => safeText(value).toLowerCase().includes(q)));
-}
-
-function render() {
-  const data = filteredOrders();
-  els.ordersList.replaceChildren();
-
-  data.forEach(order => {
-    const node = els.orderTemplate.content.firstElementChild.cloneNode(true);
-    node.dataset.id = order.id;
-    node.querySelector(".order-number").textContent = order.number;
-    node.querySelector(".client").textContent = order.client;
-    node.querySelector(".items").textContent = order.items;
-    node.querySelector(".date").textContent = formatDate(order.date);
-    node.querySelector(".edit-btn").addEventListener("click", () => openEdit(order));
-    node.querySelector(".delete-btn").addEventListener("click", () => deleteOrder(order));
-    els.ordersList.append(node);
-  });
-
-  els.orderCount.textContent = `${orders.length} ${orders.length === 1 ? "pedido" : "pedidos"}`;
-  els.emptyState.classList.toggle("hidden", data.length !== 0 || Boolean(els.searchInput.value.trim()));
-
-  if (data.length === 0 && els.searchInput.value.trim()) {
-    els.ordersList.innerHTML = '<div class="empty-state"><div class="empty-doodle">⌕</div><h3>Sin resultados</h3><p>No hay pedidos que coincidan con la búsqueda.</p></div>';
-  }
-}
-
-function resetForm() {
-  els.form.reset();
-  els.orderId.value = "";
-  els.dialogTitle.textContent = "Nuevo pedido";
-}
-
-function openNew() {
-  resetForm();
-  els.dialog.showModal();
-  setTimeout(() => els.orderNumber.focus(), 30);
-}
-
-function openEdit(order) {
-  els.dialogTitle.textContent = "Editar pedido";
-  els.orderId.value = order.id;
-  els.orderNumber.value = order.number;
-  els.client.value = order.client;
-  els.items.value = order.items;
-  els.deliveryDate.value = order.date;
-  els.dialog.showModal();
-  setTimeout(() => els.orderNumber.focus(), 30);
-}
-
-async function saveOrder(event) {
-  event.preventDefault();
-  const existingId = els.orderId.value.trim();
-  const now = Date.now();
-  const payload = {
-    number: els.orderNumber.value.trim(),
-    client: els.client.value.trim(),
-    items: els.items.value.trim(),
-    date: els.deliveryDate.value,
-    updatedAt: now
-  };
-
-  if (!payload.number || !payload.client || !payload.items || !payload.date) return;
-
-  try {
-    setStatus("offline", "Guardando…");
-    if (existingId) {
-      await update(ref(db, `orders/${existingId}`), payload);
-    } else {
-      const newRef = push(ordersRef);
-      await set(newRef, { ...payload, createdAt: now });
-    }
-    els.dialog.close();
-    resetForm();
-    setStatus("online", "Sincronizado");
-  } catch (error) {
-    console.error(error);
-    setStatus("error", "Error al guardar");
-    alert("No se ha podido guardar el pedido. Revisa la conexión y la configuración de Firebase.");
-  }
-}
-
-async function deleteOrder(order) {
-  if (!confirm(`¿Eliminar el pedido ${order.number}?`)) return;
-  try {
-    setStatus("offline", "Guardando…");
-    await remove(ref(db, `orders/${order.id}`));
-    setStatus("online", "Sincronizado");
-  } catch (error) {
-    console.error(error);
-    setStatus("error", "Error al eliminar");
-    alert("No se ha podido eliminar el pedido.");
-  }
-}
-
-function exportBackup() {
-  const backup = {
-    app: "Pizarra de Pedidos",
-    exportedAt: new Date().toISOString(),
-    orders: orders.map(({ id, ...order }) => ({ id, ...order }))
-  };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `pizarra-pedidos-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function importBackup(file) {
-  if (!file) return;
-  try {
-    const parsed = JSON.parse(await file.text());
-    if (!Array.isArray(parsed.orders)) throw new Error("Formato incorrecto");
-    if (!confirm(`Se importarán ${parsed.orders.length} pedidos. Los pedidos actuales no se borrarán. ¿Continuar?`)) return;
-
-    for (const incoming of parsed.orders) {
-      const newRef = push(ordersRef);
-      await set(newRef, {
-        number: safeText(incoming.number).slice(0, 60),
-        client: safeText(incoming.client).slice(0, 140),
-        items: safeText(incoming.items).slice(0, 4000),
-        date: safeText(incoming.date).slice(0, 10),
-        createdAt: Number(incoming.createdAt) || Date.now(),
-        updatedAt: Date.now()
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    alert("Ese archivo no parece ser una copia válida de la pizarra.");
-  } finally {
-    els.importInput.value = "";
-  }
-}
-
-onValue(
-  ordersRef,
-  snapshot => {
-    const raw = snapshot.val() || {};
-    orders = Object.entries(raw)
-      .map(([id, value]) => ({ id, ...value }))
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    loadedOnce = true;
-    setStatus("online", "Sincronizado");
-    render();
-  },
-  error => {
-    console.error(error);
-    setStatus("error", "Sin conexión a la base");
-    if (!loadedOnce) {
-      els.ordersList.innerHTML = '<div class="empty-state"><div class="empty-doodle">!</div><h3>No puedo acceder a Firebase</h3><p>Comprueba firebase-config.js y las reglas de Realtime Database.</p></div>';
-    }
-  }
-);
-
-els.newOrderBtn.addEventListener("click", openNew);
-els.closeDialogBtn.addEventListener("click", () => els.dialog.close());
-els.cancelBtn.addEventListener("click", () => els.dialog.close());
-els.form.addEventListener("submit", saveOrder);
-els.searchInput.addEventListener("input", render);
-els.exportBtn.addEventListener("click", exportBackup);
-els.importInput.addEventListener("change", event => importBackup(event.target.files?.[0]));
-
-els.dialog.addEventListener("click", event => {
-  const rect = els.dialog.getBoundingClientRect();
-  const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
-  if (outside) els.dialog.close();
-});
-
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

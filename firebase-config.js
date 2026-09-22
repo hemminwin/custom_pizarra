@@ -1,7 +1,9 @@
-// PEGA AQUÍ la configuración que te da Firebase al registrar una app Web.
-// No cambies los nombres de las propiedades.
-export const firebaseConfig = {
-  apiKey: ""AIzaSyC86rm0aOvsh7Hj7HW8qTgnLugzoU44Qb4"",
+// Configuración pública de tu app web de Firebase.
+// Estos valores NO son una contraseña.
+// La seguridad real depende de las reglas de Realtime Database.
+
+window.firebaseConfig = {
+  apiKey: "AIzaSyC86rm0aOvsh7Hj7HW8qTgnLugzoU44Qb4",
   authDomain: "custompizarra.firebaseapp.com",
   databaseURL: "https://custompizarra-default-rtdb.firebaseio.com",
   projectId: "custompizarra",
