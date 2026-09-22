@@ -12,7 +12,7 @@
     <header class="topbar">
       <div>
         <h1>Pizarra de Pedidos</h1>
-        <p class="subtitle">Sincronizada entre tus ordenadores</p>
+        <p class="subtitle">Excel → pizarra → sincronizado en todos los equipos</p>
       </div>
 
       <div class="top-actions">
@@ -21,14 +21,19 @@
           <span id="syncText">Conectando...</span>
         </span>
 
-        <button id="newOrderBtn" class="primary-btn" type="button">+ Nuevo pedido</button>
+        <label class="primary-btn upload-btn">
+          ↑ Subir Excel
+          <input id="excelInput" type="file" accept=".xlsx,.xls,.xlsm,.xlsb">
+        </label>
+
+        <button id="newOrderBtn" class="secondary-btn" type="button">+ Pedido manual</button>
       </div>
     </header>
 
     <section class="toolbar">
       <label class="search-box">
         <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" placeholder="Buscar por nº, cliente, artículos o fecha">
+        <input id="searchInput" type="search" placeholder="Buscar en cualquier columna">
       </label>
 
       <div class="toolbar-buttons">
@@ -40,17 +45,14 @@
       </div>
     </section>
 
-    <section class="whiteboard">
-      <div class="board-heading">
-        <div>Nº pedido</div>
-        <div>Cliente</div>
-        <div>Artículos</div>
-        <div>Fecha</div>
-        <div class="actions-title">Acciones</div>
-      </div>
+    <div id="messageBar" class="message-bar" hidden></div>
 
-      <div id="ordersList" class="orders-list">
-        <div class="empty-state">Conectando con la pizarra…</div>
+    <section class="whiteboard">
+      <div class="board-scroll">
+        <div id="boardHeader" class="board-grid board-heading"></div>
+        <div id="ordersList" class="orders-list">
+          <div class="empty-state">Conectando con la pizarra…</div>
+        </div>
       </div>
     </section>
   </main>
@@ -58,31 +60,13 @@
   <dialog id="orderDialog" class="order-dialog">
     <form id="orderForm" method="dialog">
       <div class="dialog-header">
-        <h2 id="dialogTitle">Nuevo pedido</h2>
+        <h2 id="dialogTitle">Pedido</h2>
         <button id="closeDialogBtn" class="icon-btn" type="button" aria-label="Cerrar">×</button>
       </div>
 
       <input id="firebaseKey" type="hidden">
 
-      <label>
-        Nº pedido
-        <input id="orderNumber" name="orderNumber" type="text" required autocomplete="off">
-      </label>
-
-      <label>
-        Cliente
-        <input id="clientName" name="clientName" type="text" required autocomplete="off">
-      </label>
-
-      <label>
-        Artículos
-        <textarea id="articles" name="articles" rows="5" required placeholder="Puedes escribir varias líneas"></textarea>
-      </label>
-
-      <label>
-        Fecha
-        <input id="orderDate" name="orderDate" type="date" required>
-      </label>
+      <div id="formFields" class="form-fields"></div>
 
       <div class="dialog-actions">
         <button id="cancelBtn" class="secondary-btn" type="button">Cancelar</button>
@@ -91,8 +75,13 @@
     </form>
   </dialog>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+
+  <!-- Lector de Excel. No necesita cuenta ni instalación. -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
   <script src="firebase-config.js"></script>
   <script src="app.js"></script>
 </body>
